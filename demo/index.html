@@ -279,15 +279,18 @@
           });
         };
 
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const context = new AudioContext();
+
         var options = {
           containers: {
             zoomview: document.getElementById('zoomview-container'),
             overview: document.getElementById('overview-container')
           },
           mediaElement: document.getElementById('audio'),
-          dataUri: {
-            arraybuffer: '/TOL_6min_720p_download.dat',
-            json: '/TOL_6min_720p_download.json'
+          webAudio: {
+            audioContext: context,
           },
           keyboard: true,
           pointMarkerColor: '#006eb0',
@@ -295,6 +298,8 @@
           waveformCache: true,
           zoomLevels: [512, 1024, 2048, 4096]
         };
+
+
 
         Peaks.init(options, function(err, peaksInstance) {
           if (err) {

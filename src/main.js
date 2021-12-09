@@ -57,6 +57,8 @@ function Peaks() {
     segmentColor:            '#ff851b',
     pointMarkerColor:        '#39cccc',
 
+    replaceWaveSpectrogram: false,
+
     createSegmentMarker:     createSegmentMarker,
     createSegmentLabel:      createSegmentLabel,
     createPointMarker:       createPointMarker,
@@ -241,6 +243,8 @@ Peaks.init = function(opts, callback) {
 
   var zoomviewContainer = instance.options.zoomview.container;
   var overviewContainer = instance.options.overview.container;
+
+  var replaceWaveSpectrogram = opts.replaceWaveSpectrogram;
 
   if (!isHTMLElement(zoomviewContainer) &&
       !isHTMLElement(overviewContainer)) {

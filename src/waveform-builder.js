@@ -8,6 +8,7 @@
 
 import { isArrayBuffer, isObject, isString } from './utils';
 import WaveformData from 'waveform-data';
+import SpectrogramData from './specogram-data';
 
 var isXhr2 = ('withCredentials' in new XMLHttpRequest());
 
@@ -102,6 +103,10 @@ WaveformBuilder.prototype.init = function(options, callback) {
     };
   }
 
+  console.log('Options:');
+
+  console.log(options);
+
   if (options.dataUri) {
     return this._getRemoteWaveformData(options, callback);
   }
@@ -190,7 +195,23 @@ WaveformBuilder.prototype._getRemoteWaveformData = function(options, callback) {
       return;
     }
 
+    console.log(options);
+
+    var audioCtx = options.dataURI;
+
+    var analyser = audioCtx.createAnalyser();
+
+    analyser.fftSize = 256;
+
+    var dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    analyser.getByteFrequencyData(dataArray);
+
+    console.log(dataArray);
+
     var waveformData = WaveformData.create(event.target.response);
+
+    console.log(event.target.response);
 
     if (waveformData.channels !== 1 && waveformData.channels !== 2) {
       callback(new Error('Peaks.init(): Only mono or stereo waveforms are currently supported'));
@@ -285,6 +306,8 @@ WaveformBuilder.prototype._buildWaveformFromLocalData = function(options, callba
 WaveformBuilder.prototype._buildWaveformDataUsingWebAudio = function(options, callback) {
   var self = this;
 
+  console.log('Build waveform using webaudio');
+
   var audioContext = window.AudioContext || window.webkitAudioContext;
 
   if (!(options.webAudio.audioContext instanceof audioContext)) {
@@ -326,6 +349,9 @@ WaveformBuilder.prototype._buildWaveformDataUsingWebAudio = function(options, ca
 };
 
 WaveformBuilder.prototype._buildWaveformDataFromAudioBuffer = function(options, callback) {
+
+  console.log('Build waveform data from audio buffer');
+
   var webAudioOptions = options.webAudio;
 
   if (webAudioOptions.scale !== options.zoomLevels[0]) {
@@ -381,7 +407,11 @@ WaveformBuilder.prototype._requestAudioAndBuildWaveformData = function(url,
       scale: webAudio.scale
     };
 
-    WaveformData.createFromAudio(webAudioBuilderOptions, callback);
+    //@note: array_buffer is call by reference type
+    //WaveformData.createFromAudio(webAudioBuilderOptions, callback);
+
+    SpectrogramData.createFromAudio(webAudioBuilderOptions, callback);
+
   },
   function() {
     callback(new Error('XHR Failed'));
