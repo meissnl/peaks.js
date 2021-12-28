@@ -22,7 +22,7 @@ import Konva from 'konva/lib/Core';
  * Creates a zoomable waveform view.
  *
  * @class
- * @alias WaveformZoomView
+ * @alias SpectrogramZoomView
  *
  * @param {WaveformData} waveformData
  * @param {HTMLElement} container
@@ -378,7 +378,7 @@ function isAutoScale(options) {
 }
 
 /**
- * Options for [WaveformZoomView.setZoom]{@link WaveformZoomView#setZoom}.
+ * Options for [SpectrogramZoomView.setZoom]{@link WaveformZoomView#setZoom}.
  *
  * @typedef {Object} SetZoomOptions
  * @global
@@ -569,7 +569,7 @@ WaveformZoomView.prototype.pixelOffsetToTime = function(offset) {
   'static': StaticZoomAdapter
 };
 
-WaveformZoomView.prototype.createZoomAdapter = function(currentScale, previousScale) {
+SpectrogramZoomView.prototype.createZoomAdapter = function(currentScale, previousScale) {
   var ZoomAdapter = zoomAdapterMap[this._viewOptions.zoomAdapter];
 
   if (!ZoomAdapter) {
@@ -867,7 +867,7 @@ WaveformZoomView.prototype.fitToContainer = function() {
   this._stage.draw();
 };
 
-/* WaveformZoomView.prototype.beginZoom = function() {
+/* SpectrogramZoomView.prototype.beginZoom = function() {
   // Fade out the time axis and the segments
   // this._axis.axisShape.setAttr('opacity', 0);
 
@@ -880,7 +880,7 @@ WaveformZoomView.prototype.fitToContainer = function() {
   }
 };
 
-WaveformZoomView.prototype.endZoom = function() {
+SpectrogramZoomView.prototype.endZoom = function() {
   if (this._pointsLayer) {
     this._pointsLayer.setVisible(true);
   }

@@ -524,7 +524,7 @@
  * Added `ZoomController` and `TimeController` classes to simplify main.js (@chrisn)
 
  * Added `PlayheadLayer` class and refactored `WaveformOverview` and
-   `WaveformZoomView` so that the playhead update code is reused between both
+   `SpectrogramZoomView` so that the playhead update code is reused between both
    (@chrisn)
 
  * Added `peaks.points.getPoint()` method (@chrisn)

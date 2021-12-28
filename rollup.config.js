@@ -47,7 +47,7 @@ export default [
     plugins: [
       commonjs(),
       resolve({ browser: true }),
-      babel({ babelHelpers: 'bundled' })
+      babel({ babelHelpers: 'bundled', skipPreflightCheck: true })
     ]
   },
   // dist/peaks.esm.js is an ES module bundle that does not include Konva.js
@@ -65,7 +65,7 @@ export default [
       peerDepsExternal(),
       commonjs(),
       resolve({ browser: true }),
-      babel({ babelHelpers: 'bundled' })
+      babel({ babelHelpers: 'bundled', skipPreflightCheck: true })
     ]
   },
   // dist/peaks.ext.js and dist/peaks.ext.min.js are UMD builds that do not
@@ -95,7 +95,7 @@ export default [
       peerDepsExternal(),
       commonjs(),
       resolve({ browser: true }),
-      babel({ babelHelpers: 'bundled' })
+      babel({ babelHelpers: 'bundled', skipPreflightCheck: true })
     ]
   }
 ];

@@ -1,5 +1,5 @@
 /**
- * Provides access to the waveform data for a single audio channel.
+ * Provides access to the spectrogram data for a single audio channel.
  */
 
 function SpectrogramDataChannel(spectrogramData, channelIndex) {
@@ -8,7 +8,7 @@ function SpectrogramDataChannel(spectrogramData, channelIndex) {
 }
 
 /**
- * Returns the waveform minimum at the given index position.
+ * Returns the spectrogram minimum at the given index position.
  */
 
 SpectrogramDataChannel.prototype.min_sample = function(index) {
@@ -18,7 +18,7 @@ SpectrogramDataChannel.prototype.min_sample = function(index) {
 };
 
 /**
- * Returns the waveform maximum at the given index position.
+ * Returns the spectrogram maximum at the given index position.
  */
 
 SpectrogramDataChannel.prototype.max_sample = function(index) {
@@ -28,7 +28,7 @@ SpectrogramDataChannel.prototype.max_sample = function(index) {
 };
 
 /**
- * Sets the waveform minimum at the given index position.
+ * Sets the spectrogram minimum at the given index position.
  */
 
 SpectrogramDataChannel.prototype.set_min_sample = function(index, sample) {
@@ -38,7 +38,7 @@ SpectrogramDataChannel.prototype.set_min_sample = function(index, sample) {
 };
 
 /**
- * Sets the waveform maximum at the given index position.
+ * Sets the spectrogram maximum at the given index position.
  */
 
 SpectrogramDataChannel.prototype.set_max_sample = function(index, sample) {
@@ -48,7 +48,7 @@ SpectrogramDataChannel.prototype.set_max_sample = function(index, sample) {
 };
 
 /**
- * Returns all the waveform minimum values as an array.
+ * Returns all the spectrogram minimum values as an array.
  */
 
 SpectrogramDataChannel.prototype.min_array = function() {
@@ -63,7 +63,7 @@ SpectrogramDataChannel.prototype.min_array = function() {
 };
 
 /**
- * Returns all the waveform maximum values as an array.
+ * Returns all the spectrogram maximum values as an array.
  */
 
 SpectrogramDataChannel.prototype.max_array = function() {

@@ -5,7 +5,7 @@ module.exports = {
     'es6': true
   },
   'parserOptions': {
-    'ecmaVersion': 2015,
+    'ecmaVersion': 8,
     'sourceType': 'module'
   },
   'extends': 'eslint:recommended',
