@@ -22,3 +22,15 @@ export function isBinarySpectrogramData(data) {
 
     return isCompatible;
 }
+
+// @todo change to check for my data format
+export function isSpectrogramJSONFormat(data) {
+    return data &&
+        typeof data === 'object' &&
+        'channels' in data &&
+        'duration' in data &&
+        'channelDbRanges' in data &&
+        'maxFreq' in data &&
+        'stride' in data &&
+        'tickCount' in data;
+}

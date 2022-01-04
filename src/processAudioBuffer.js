@@ -34,13 +34,13 @@ function remapDataToTwoDimensionalMatrix(data, strideSize, tickCount) {
     // [1, 4]
     // [2, 5]
     // [3, 6]
-    const output = Array.from(Array(strideSize)).map(() =>
-        Array.from(Array(tickCount))
+    const output = Array.from(Array(tickCount)).map(() =>
+        Array.from(Array(strideSize))
     );
 
-    for (let row = 0; row < strideSize; row += 1) {
-        for (let col = 0; col < tickCount; col += 1) {
-            output[row][col] = arr[col * strideSize + row];
+    for (let row = 0; row < tickCount; row += 1) {
+        for (let col = 0; col < strideSize; col += 1) {
+            output[row][col] = arr[col * tickCount + row];
         }
     }
 
@@ -156,6 +156,7 @@ async function processWaveForm(audioBuffer) {
     const channels = channelFFtDataBuffers;
     let channelData = new Array();
 
+
     console.log(audioBuffer.length);
 
     for (let i = 0; i < channels.length; i++) {
@@ -172,7 +173,7 @@ async function processWaveForm(audioBuffer) {
     console.log(channelData);
 
     return {
-        channels: channels,
+        channels: channelData,
         channelDbRanges,
         stride: stride,
         tickCount: tickCount,

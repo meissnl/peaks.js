@@ -2,17 +2,17 @@
  * Provides access to the spectrogram data for a single audio channel.
  */
 
-function SpectrogramDataChannel(spectrogramData, channelIndex) {
+function SpectrogramDataChannel(spectrogramData, channelIndex, maxFreq) {
     this._spectrogramData = spectrogramData;
     this._channelIndex = channelIndex;
 }
 
 /**
- * Returns the spectrogram minimum at the given index position.
+ * Returns the spectrogram data as array at given position.
  */
 
-SpectrogramDataChannel.prototype.min_sample = function(index) {
-    var offset = (index * this._spectrogramData.channels + this._channelIndex) * 2;
+SpectrogramDataChannel.prototype.frequency_array_at_index = function(index) {
+    var offset = (index * this._spectrogramData.channels + this._channelIndex) ;
 
     return this._spectrogramData._at(offset);
 };

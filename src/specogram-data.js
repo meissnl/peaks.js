@@ -6,18 +6,27 @@
  * @module spectrogram-data
  */
 import { generateSpectrogramData } from './spectrogram-generator';
-import { isJsonSpectrogramData, isBinarySpectrogramData } from './spectrogram-utils';
+import { isJsonSpectrogramData, isBinarySpectrogramData, isSpectrogramJSONFormat } from './spectrogram-utils';
 import SpectrogramDataChannel from './spectrogram-data-channel';
 import { processWaveForm } from './processAudioBuffer';
 
 // rewrite do support spectrogram
 function SpectrogramData(data) {
+  if (isSpectrogramJSONFormat(data)) {
+    //this._data = new DataView(data);
+    //this._offset = this._version() === 2 ? 24 : 20;
+
+    this._channels = [];
+    for (var channel1 = 0; channel1 < this.channels; channel1++) {
+      this._channels[channel1] = new SpectrogramDataChannel(this, channel1);
+    }
+    console.log(this);
+  }
   if (isJsonSpectrogramData(data)) {
     throw new TypeError(
       'Spectrogram.create(): JSON format is not supported. convertJSONToBinary() is not implemented'
     );
   }
-
   if (isBinarySpectrogramData(data)) {
     this._data = new DataView(data);
     this._offset = this._version() === 2 ? 24 : 20;
@@ -27,7 +36,6 @@ function SpectrogramData(data) {
     for (var channel = 0; channel < this.channels; channel++) {
       this._channels[channel] = new SpectrogramDataChannel(this, channel);
     }
-    console.log(this);
   }
   else {
     throw new TypeError(
