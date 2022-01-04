@@ -15,6 +15,8 @@ function SpectrogramData(data) {
   if (isSpectrogramJSONFormat(data)) {
     //this._data = new DataView(data);
     //this._offset = this._version() === 2 ? 24 : 20;
+    this._data = data;
+    this._length = data.channels[0].length;
 
     this._channels = [];
     for (var channel1 = 0; channel1 < this.channels; channel1++) {
@@ -36,11 +38,6 @@ function SpectrogramData(data) {
     for (var channel = 0; channel < this.channels; channel++) {
       this._channels[channel] = new SpectrogramDataChannel(this, channel);
     }
-  }
-  else {
-    throw new TypeError(
-      'WaveformData.create(): Unknown data format'
-    );
   }
 }
 
@@ -440,7 +437,7 @@ SpectrogramData.prototype = {
      */
 
   _version: function() {
-    return this._data.getInt32(0, true);
+    return 1.0;
   },
 
   /**
@@ -448,11 +445,12 @@ SpectrogramData.prototype = {
      */
 
   get length() {
-    return this._data.getUint32(16, true);
+    return this._length;
   },
 
   /**
      * Returns the number of bits per sample, either 8 or 16.
+   *  Not implemented for spectrogram
      */
 
   get bits() {
@@ -531,26 +529,18 @@ SpectrogramData.prototype = {
      * Returns a waveform data value at a specific offset.
      */
 
-  _at: function at_sample(index) {
-    if (this.bits === 8) {
-      return this._data.getInt8(this._offset + index);
-    }
-    else {
-      return this._data.getInt16(this._offset + index * 2, true);
-    }
+  _at: function at_sample(index, channel) {
+    return this._data.channels[channel][index];
   },
 
   /**
-     * Sets a waveform data value at a specific offset.
+     * Sets a spectrogram data value at a specific offset. (always sets whole array)
+   * NOT WORKING
      */
 
-  _set_at: function set_at(index, sample) {
-    if (this.bits === 8) {
-      return this._data.setInt8(this._offset + index, sample);
-    }
-    else {
-      return this._data.setInt16(this._offset + index * 2, sample, true);
-    }
+  _set_at: function set_at(index, channel, sample) {
+    this._data.channels[channel][index] = sample;
+    return true;
   },
 
   /**
