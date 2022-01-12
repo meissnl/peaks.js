@@ -408,33 +408,7 @@ WaveformBuilder.prototype._requestAudioAndBuildWaveformData = function(url,
     };
 
     //@note: array_buffer is call by reference type
-    //WaveformData.createFromAudio(webAudioBuilderOptions, callback);
-    /*
-    WaveformData.createFromAudio(webAudioBuilderOptions, function(err, waveformData) {
-      const channel = waveformData.channel(0);
-
-      for (let i = 0; i < waveformData.length; i++) {
-        const time = waveformData.time(i);
-        const min = channel.min_sample(i);
-        const max = channel.max_sample(i);
-
-        console.log(time, min, max);
-      }
-    });
-
-
-    WaveformData.createFromAudio(webAudioBuilderOptions, function(err, waveformData) {
-      const waveform = waveformData.toArrayBuffer();
-
-      console.log(waveform);
-      // ArrayBuffer {
-      //   [Uint8Contents]: <02 00 00 00 01 00 00 00 44 68 AC 00 00 80 00 00 00 65 14 etc.>,
-      //   byteLength: 20908
-      // }
-    });
-    */
-    SpectrogramData.createFromAudio(webAudioBuilderOptions, callback);
-
+    WaveformData.createFromAudio(webAudioBuilderOptions, callback);
   },
   function() {
     callback(new Error('XHR Failed'));

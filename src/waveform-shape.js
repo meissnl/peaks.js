@@ -155,6 +155,8 @@ WaveformShape.prototype._drawWaveform = function(context, waveformData,
       waveformHeight = height - (channels - 1) * waveformHeight;
     }
 
+    console.log(i);
+
     this._drawChannel(
       context,
       waveformData.channel(i),
@@ -186,35 +188,27 @@ WaveformShape.prototype._drawWaveform = function(context, waveformData,
 
 WaveformShape.prototype._drawChannel = function(context, channel,
     frameOffset, startPixels, endPixels, top, height) {
-  var x, amplitude;
+  var x;
+  let data_height = channel.get_height(0);
 
-  var amplitudeScale = this._view.getAmplitudeScale();
 
-  var lineX, lineY;
+  for (let i = 0; i < data_height; i++) {
+    let data_at_pixel = channel.frequency_array_at_index(i);
+    let h = height / data_height;
 
-  context.beginPath();
+    for (x = startPixels; x <= endPixels; x++) {
+      let rat = data_at_pixel[x] / 255;
 
-  for (x = startPixels; x <= endPixels; x++) {
-    amplitude = channel.min_sample(x);
+      context.beginPath();
+      context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
 
-    lineX = x - frameOffset + 0.5;
-    lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5;
+      context.moveTo(x, height - (i * h));
+      context.lineTo(x + 1, height - (i * h));
+      context.stroke();
 
-    context.lineTo(lineX, lineY);
+    }
+    context.closePath();
   }
-
-  for (x = endPixels; x >= startPixels; x--) {
-    amplitude = channel.max_sample(x);
-
-    lineX = x - frameOffset + 0.5;
-    lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5;
-
-    context.lineTo(lineX, lineY);
-  }
-
-  context.closePath();
-
-  context.fillShape(this._shape);
 };
 
 WaveformShape.prototype._waveformShapeHitFunc = function(context) {

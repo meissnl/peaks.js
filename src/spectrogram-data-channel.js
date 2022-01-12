@@ -25,4 +25,9 @@ SpectrogramDataChannel.prototype.set_frequency_array_at_index = function(index, 
     return this._spectrogramData._set_at(index, channel, sample);
 };
 
+SpectrogramDataChannel.prototype.get_height = function(channel) {
+    return this._spectrogramData._data.channels[channel].length;
+};
+
+
 export default SpectrogramDataChannel;

@@ -21,6 +21,7 @@ import {
   isHTMLElement, isFunction, isInAscendingOrder, isObject,
   objectHasProperty
 } from './utils';
+import SpectrogramformBuilder from './spectrogramform-builder';
 
 /**
  * Initialises a new Peaks instance with default option settings.
@@ -279,10 +280,9 @@ Peaks.init = function(opts, callback) {
   instance.zoom = new ZoomController(instance, instance.options.zoomLevels);
   instance.views = new ViewController(instance);
 
-  // Setup the UI components
-  var waveformBuilder = new WaveformBuilder(instance);
+  var spectrogramformBuilder = new SpectrogramformBuilder(instance);
 
-  waveformBuilder.init(instance.options, function(err, waveformData) {
+  spectrogramformBuilder.init(instance.options, function(err, waveformData) {
     if (err) {
       if (callback) {
         callback(err);
@@ -291,12 +291,7 @@ Peaks.init = function(opts, callback) {
       return;
     }
 
-    console.log(waveformData);
     instance._waveformData = waveformData;
-
-    if (overviewContainer) {
-      instance.views.createOverview(overviewContainer);
-    }
 
     if (zoomviewContainer) {
       instance.views.createZoomview(zoomviewContainer);
@@ -325,6 +320,52 @@ Peaks.init = function(opts, callback) {
 
     callback(null, instance);
   });
+
+  // Setup the UI components
+  /*
+  var waveformBuilder = new WaveformBuilder(instance);
+
+  waveformBuilder.init(instance.options, function(err, waveformData) {
+    if (err) {
+      if (callback) {
+        callback(err);
+      }
+
+      return;
+    }
+
+    console.log(waveformData);
+    instance._waveformData = waveformData;
+
+    if (overviewContainer) {
+      instance.views.createOverview(overviewContainer);
+    }
+
+    instance._addWindowResizeHandler();
+
+    if (opts.segments) {
+      instance.segments.add(opts.segments);
+    }
+
+    if (opts.points) {
+      instance.points.add(opts.points);
+    }
+
+    if (opts.emitCueEvents) {
+      instance._cueEmitter = new CueEmitter(instance);
+    }
+
+    // Allow applications to attach event handlers before emitting events,
+    // when initialising with local waveform data.
+
+    setTimeout(function() {
+      instance.emit('peaks.ready');
+    }, 0);
+
+    callback(null, instance);
+  });
+
+   */
 };
 
 Peaks.prototype._setOptions = function(opts) {

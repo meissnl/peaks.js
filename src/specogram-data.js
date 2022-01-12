@@ -13,10 +13,10 @@ import { processWaveForm } from './processAudioBuffer';
 // rewrite do support spectrogram
 function SpectrogramData(data) {
   if (isSpectrogramJSONFormat(data)) {
-    //this._data = new DataView(data);
-    //this._offset = this._version() === 2 ? 24 : 20;
+
     this._data = data;
     this._length = data.channels[0].length;
+
 
     this._channels = [];
     for (var channel1 = 0; channel1 < this.channels; channel1++) {
@@ -170,8 +170,7 @@ function SpectrogramResampler(options) {
   this._input_buffer_size = this._inputData.length;
 
   var input_buffer_length_samples = this._input_buffer_size * this._inputData.scale;
-  var output_buffer_length_samples =
-        Math.ceil(input_buffer_length_samples / this._output_samples_per_pixel);
+  var output_buffer_length_samples = Math.ceil(input_buffer_length_samples / this._output_samples_per_pixel);
 
   var output_header_size = 24; // version 2
   var bytes_per_sample = this._inputData.bits === 8 ? 1 : 2;
@@ -196,19 +195,17 @@ function SpectrogramResampler(options) {
 
   var channels = this._inputData.channels;
 
-  this._min = new Array(channels);
-  this._max = new Array(channels);
+  //Not min max but samples
+  this._samples = new Array(channels);
 
   var channel;
 
   for (channel = 0; channel < channels; ++channel) {
     if (this._input_buffer_size > 0) {
-      this._min[channel] = this._inputData.channel(channel).min_sample(this._input_index);
-      this._max[channel] = this._inputData.channel(channel).max_sample(this._input_index);
+      this._samples[channel] = this._inputData.channel(channel).frequency_array_at_index(this._input_index);
     }
     else {
-      this._min[channel] = 0;
-      this._max[channel] = 0;
+      this._samples[channel] = 0;
     }
   }
 
@@ -240,8 +237,7 @@ SpectrogramResampler.prototype.next = function() {
         for (i = 0; i < channels; ++i) {
           channel = this._outputSpectrogramData.channel(i);
 
-          channel.set_min_sample(this._output_index - 1, this._min[i]);
-          channel.set_max_sample(this._output_index - 1, this._max[i]);
+          channel.set_frequency_array_at_index(this._output_index - 1, this.sample[i]);
         }
       }
 
@@ -254,8 +250,7 @@ SpectrogramResampler.prototype.next = function() {
 
       if (this._where !== this._prev_where) {
         for (i = 0; i < channels; ++i) {
-          this._min[i] = this._max_value;
-          this._max[i] = this._min_value;
+          this._samples[i] = this._max_value;
         }
       }
     }
@@ -271,17 +266,17 @@ SpectrogramResampler.prototype.next = function() {
       for (i = 0; i < channels; ++i) {
         channel = this._inputData.channel(i);
 
-        value = channel.min_sample(this._input_index);
+        //instate of min or max sample in range, calculate average between all samples
+        value = channel.frequency_array_at_index(this._input_index);
 
-        if (value < this._min[i]) {
-          this._min[i] = value;
+        for (let i = 0;i < value.length; i++) {
+          let average = (value[i] + this._samples[i]) / 2;
+
+          value[i] = average;
         }
 
-        value = channel.max_sample(this._input_index);
+        this._samples[i] = value;
 
-        if (value > this._max[i]) {
-          this._max[i] = value;
-        }
       }
 
       this._input_index++;
@@ -300,8 +295,7 @@ SpectrogramResampler.prototype.next = function() {
       for (i = 0; i < channels; ++i) {
         channel = this._outputSpectrogramData.channel(i);
 
-        channel.set_min_sample(this._output_index - 1, this._min[i]);
-        channel.set_max_sample(this._output_index - 1, this._max[i]);
+        channel.set_frequency_array_at_index(this._output_index - 1, this._samples[i]);
       }
     }
 
@@ -514,7 +508,7 @@ SpectrogramData.prototype = {
      */
 
   get sample_rate() {
-    return this._data.getInt32(8, true);
+    return this._data.sample_rate;
   },
 
   /**
@@ -522,7 +516,7 @@ SpectrogramData.prototype = {
      */
 
   get scale() {
-    return this._data.getInt32(12, true);
+    return this._data.scale;
   },
 
   /**

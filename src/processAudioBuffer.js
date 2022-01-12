@@ -17,7 +17,7 @@ const config = {
      * determines how often FFT is run
      * Bigger Buffer reduces the amounts of FFTs calculated
      */
-    processorBufferSize: 2048,
+    processorBufferSize: 1024,
 };
 
 function remapDataToTwoDimensionalMatrix(data, strideSize, tickCount) {
@@ -34,13 +34,13 @@ function remapDataToTwoDimensionalMatrix(data, strideSize, tickCount) {
     // [1, 4]
     // [2, 5]
     // [3, 6]
-    const output = Array.from(Array(tickCount)).map(() =>
-        Array.from(Array(strideSize))
+    const output = Array.from(Array(strideSize)).map(() =>
+        Array.from(Array(tickCount))
     );
 
-    for (let row = 0; row < tickCount; row += 1) {
-        for (let col = 0; col < strideSize; col += 1) {
-            output[row][col] = arr[col * tickCount + row];
+    for (let row = 0; row < strideSize; row += 1) {
+        for (let col = 0; col < tickCount; col += 1) {
+            output[row][col] = arr[col * strideSize + row];
         }
     }
 
@@ -160,6 +160,7 @@ async function processWaveForm(audioBuffer) {
     console.log(audioBuffer.length);
 
     for (let i = 0; i < channels.length; i++) {
+
         const remappedData = remapDataToTwoDimensionalMatrix(
             channels[i],
             stride,
@@ -170,6 +171,10 @@ async function processWaveForm(audioBuffer) {
         channelData[i] = remappedData.slice();
     }
 
+    console.log(offlineCtx.sampleRate);
+    let sample_rate = offlineCtx.sampleRate;
+    let scale = 512;
+
     console.log(channelData);
 
     return {
@@ -179,6 +184,8 @@ async function processWaveForm(audioBuffer) {
         tickCount: tickCount,
         maxFreq: maxFreq,
         duration: duration,
+        sample_rate: sample_rate,
+        scale: scale
     };
 }
 
