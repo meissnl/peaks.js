@@ -171,11 +171,11 @@ async function processWaveForm(audioBuffer) {
         channelData[i] = remappedData.slice();
     }
 
-    console.log(offlineCtx.sampleRate);
     let sample_rate = offlineCtx.sampleRate;
     let scale = 512;
+    let time_to_pixel = sample_rate / scale;
 
-    console.log(channelData);
+    console.log(time_to_pixel);
 
     return {
         channels: channelData,
@@ -185,7 +185,8 @@ async function processWaveForm(audioBuffer) {
         maxFreq: maxFreq,
         duration: duration,
         sample_rate: sample_rate,
-        scale: scale
+        scale: scale,
+        time_to_pixel: time_to_pixel
     };
 }
 

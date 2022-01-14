@@ -322,7 +322,7 @@ Peaks.init = function(opts, callback) {
   });
 
   // Setup the UI components
-  /*
+
   var waveformBuilder = new WaveformBuilder(instance);
 
   waveformBuilder.init(instance.options, function(err, waveformData) {
@@ -365,7 +365,7 @@ Peaks.init = function(opts, callback) {
     callback(null, instance);
   });
 
-   */
+
 };
 
 Peaks.prototype._setOptions = function(opts) {

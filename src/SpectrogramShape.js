@@ -186,29 +186,28 @@ SpectrogramShape.prototype._drawWaveform = function(context, waveformData,
 
 SpectrogramShape.prototype._drawChannel = function(context, channel,
     frameOffset, startPixels, endPixels, top, height) {
-    var x, amplitude;
+    var x;
+    let data_height = channel.get_height(0);
+    let time_in_sec = (endPixels - startPixels) / channel._spectrogramData._data.time_to_pixel;
+    let fft_per_sec = channel._spectrogramData._data.duration / channel.get_length();
 
-    var amplitudeScale = this._view.getAmplitudeScale();
 
-    var lineX, lineY;
+    for (let i = 0; i < data_height; i++) {
+      let data_at_pixel = channel.frequency_array_at_index(i);
+      let h = height / data_height;
 
-    for (x = startPixels; x <= endPixels; x++) {
-        let data_at_pixel = channel.frequency_array_at_index(x);
+      for (x = startPixels; x <= endPixels; x++) {
+        let rat = data_at_pixel[x] / 255;
 
-        console.log(x);
+        context.beginPath();
+        context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
 
-        for (let i = 0; i < data_at_pixel.length; i++) {
-            let rat = data_at_pixel[i] / 255;
+        context.moveTo(x, height - (i * h));
+        context.lineTo(x + 1, height - (i * h));
+        context.stroke();
 
-            context.beginPath();
-            context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
-            context.moveTo(x, i * height);
-            context.lineTo(x, i * height + height);
-            context.stroke();
-        }
-
-        context.closePath();
-
+      }
+      context.closePath();
     }
 
     /*

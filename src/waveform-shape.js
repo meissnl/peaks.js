@@ -188,26 +188,70 @@ WaveformShape.prototype._drawWaveform = function(context, waveformData,
 
 WaveformShape.prototype._drawChannel = function(context, channel,
     frameOffset, startPixels, endPixels, top, height) {
-  var x;
-  let data_height = channel.get_height(0);
 
+  if (typeof channel.existsIsSpectrogram === 'function') {
+    var x;
+    let data_height = channel.get_height(0);
+    let canvas_time_in_sec = (endPixels - startPixels) / channel._spectrogramData._data.time_to_pixel;
+    let time_offset = startPixels / channel._spectrogramData._data.time_to_pixel;
+    let fft_per_sec = channel.get_length() / channel._spectrogramData._data.duration;
+    let canvas_fft_amount = Math.floor(fft_per_sec * canvas_time_in_sec);
+    let fft_width = (endPixels - startPixels) / canvas_fft_amount;
 
-  for (let i = 0; i < data_height; i++) {
-    let data_at_pixel = channel.frequency_array_at_index(i);
-    let h = height / data_height;
+    let first_fft = Math.floor(time_offset * fft_per_sec);
+    let last_fft = Math.floor(first_fft + canvas_fft_amount);
 
-    for (x = startPixels; x <= endPixels; x++) {
-      let rat = data_at_pixel[x] / 255;
+    for (let i = 0; i < data_height; i++) {
+      let data_at_pixel = channel.frequency_array_at_index(i);
+      let h = height / data_height;
+      let start = startPixels;
 
-      context.beginPath();
-      context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
+      for (x = first_fft; x <= last_fft; x++) {
+        let rat = data_at_pixel[x] / 255;
 
-      context.moveTo(x, height - (i * h));
-      context.lineTo(x + 1, height - (i * h));
-      context.stroke();
+        context.beginPath();
+        context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
 
+        context.moveTo(start - frameOffset, height - (i * h));
+        context.lineTo((start + fft_width) - frameOffset, height - (i * h));
+        context.stroke();
+
+        start += fft_width;
+
+      }
+      context.closePath();
     }
+  }
+  else {
+    var x2, amplitude;
+
+    var amplitudeScale = this._view.getAmplitudeScale();
+
+    var lineX, lineY;
+
+    context.beginPath();
+
+    for (x2 = startPixels; x2 <= endPixels; x2++) {
+      amplitude = channel.min_sample(x2);
+
+      lineX = x2 - frameOffset + 0.5;
+      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5;
+
+      context.lineTo(lineX, lineY);
+    }
+
+    for (x2 = endPixels; x2 >= startPixels; x2--) {
+      amplitude = channel.max_sample(x2);
+
+      lineX = x2 - frameOffset + 0.5;
+      lineY = top + WaveformShape.scaleY(amplitude, height, amplitudeScale) + 0.5;
+
+      context.lineTo(lineX, lineY);
+    }
+
     context.closePath();
+
+    context.fillShape(this._shape);
   }
 };
 

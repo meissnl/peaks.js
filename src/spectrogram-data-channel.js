@@ -29,5 +29,12 @@ SpectrogramDataChannel.prototype.get_height = function(channel) {
     return this._spectrogramData._data.channels[channel].length;
 };
 
+SpectrogramDataChannel.prototype.get_length = function() {
+    return this.frequency_array_at_index(0).length;
+};
+
+SpectrogramDataChannel.prototype.existsIsSpectrogram = function() {
+    return true;
+};
 
 export default SpectrogramDataChannel;
