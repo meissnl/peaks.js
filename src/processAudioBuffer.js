@@ -156,9 +156,6 @@ async function processWaveForm(audioBuffer) {
     const channels = channelFFtDataBuffers;
     let channelData = new Array();
 
-
-    console.log(audioBuffer.length);
-
     for (let i = 0; i < channels.length; i++) {
 
         const remappedData = remapDataToTwoDimensionalMatrix(
@@ -174,8 +171,6 @@ async function processWaveForm(audioBuffer) {
     let sample_rate = offlineCtx.sampleRate;
     let scale = 512;
     let time_to_pixel = sample_rate / scale;
-
-    console.log(time_to_pixel);
 
     return {
         channels: channelData,

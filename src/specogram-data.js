@@ -15,7 +15,7 @@ function SpectrogramData(data) {
   if (isSpectrogramJSONFormat(data)) {
 
     this._data = data;
-    this._length = data.channels[0].length;
+    this._length = data.channels[0][0].length;
 
 
     this._channels = [];

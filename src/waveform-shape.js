@@ -141,7 +141,16 @@ WaveformShape.prototype._drawWaveform = function(context, waveformData,
     endPixels = limit;
   }
 
-  if (endPixels > waveformData.length - 1) {
+  if (typeof waveformData.channel(0).existsIsSpectrogram === 'function') {
+    let sec_in_canvas = width / waveformData._data.time_to_pixel;
+    let amount_canvas_in_audio = waveformData._data.duration /  sec_in_canvas;
+    let pixelLength = amount_canvas_in_audio * width;
+
+    if (endPixels > pixelLength) {
+      endPixels = pixelLength - 1;
+    }
+  }
+  else if (endPixels > waveformData.length - 1) {
     endPixels = waveformData.length - 1;
   }
 
@@ -207,14 +216,18 @@ WaveformShape.prototype._drawChannel = function(context, channel,
       let start = startPixels;
 
       for (x = first_fft; x <= last_fft; x++) {
-        let rat = data_at_pixel[x] / 255;
+        let data_at_x = data_at_pixel[x];
 
-        context.beginPath();
-        context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
+        if (data_at_x !== 0) {
+          let rat = data_at_x  / 255;
 
-        context.moveTo(start - frameOffset, height - (i * h));
-        context.lineTo((start + fft_width) - frameOffset, height - (i * h));
-        context.stroke();
+          context.beginPath();
+          context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
+
+          context.moveTo(start - frameOffset, height - (i * h));
+          context.lineTo((start + fft_width) - frameOffset, height - (i * h));
+          context.stroke();
+        }
 
         start += fft_width;
 

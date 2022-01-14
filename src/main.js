@@ -334,7 +334,6 @@ Peaks.init = function(opts, callback) {
       return;
     }
 
-    console.log(waveformData);
     instance._waveformData = waveformData;
 
     if (overviewContainer) {

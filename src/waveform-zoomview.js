@@ -505,7 +505,15 @@ WaveformZoomView.prototype.setZoom = function(options) {
   }
 
   this._scale = this._data.scale;
-  this._pixelLength = this._data.length;
+  if (typeof this._originalWaveformData.channel(0).existsIsSpectrogram === 'function') {
+    let sec_in_canvas = options.width / this._originalWaveformData._data.time_to_pixel;
+    let amount_canvas_in_audio = this._getDuration() /  sec_in_canvas;
+
+    this._pixelLength = Math.floor(amount_canvas_in_audio * options.width);
+  }
+  else {
+    this._pixelLength = this._data.length;
+  }
 };
 
 WaveformZoomView.prototype.getStartTime = function() {
