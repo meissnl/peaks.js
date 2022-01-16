@@ -206,6 +206,17 @@ WaveformShape.prototype._convertRGBAToRGBArray = function(color) {
   return color_rgb;
 };
 
+WaveformShape.prototype._convertHex8ToRGBArray = function(color) {
+  let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+    a: parseInt(result[4], 16)
+  } : null;
+};
+
 /**
  * Draws a single waveform channel on a canvas context.
  *
@@ -239,7 +250,12 @@ WaveformShape.prototype._drawChannel = function(context, channel,
     let color_rgb = this._color;
 
     if (color_rgb.indexOf('#') === 0) {
-      color_rgb = this._convertHexToRGBArray(color_rgb);
+      if (color_rgb.length > 7) {
+        color_rgb = this._convertHex8ToRGBArray(color_rgb);
+      }
+      else {
+        color_rgb = this._convertHexToRGBArray(color_rgb);
+      }
     }
     else {
       color_rgb = this._convertRGBAToRGBArray(color_rgb);
