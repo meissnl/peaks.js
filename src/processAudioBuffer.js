@@ -24,7 +24,9 @@ function remapDataToTwoDimensionalMatrix(data, strideSize, tickCount) {
     /**
      * @type {Array<number>}
      */
-    const arr = Array.from(data);
+    const arr = new Uint8Array(data);
+
+    //const arr = Array.from(data);
 
     // Map the one dimensional data to two dimensional data where data goes from right to left
     // [1, 2, 3, 4, 5, 6]
