@@ -180,6 +180,32 @@ WaveformShape.prototype._drawWaveform = function(context, waveformData,
   }
 };
 
+
+WaveformShape.prototype._convertHexToRGBArray = function(color) {
+  let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+};
+
+WaveformShape.prototype._convertRGBAToRGBArray = function(color) {
+  let colorArr = color.slice(
+      color.indexOf('(') + 1,
+      color.indexOf(')')
+  ).split(', ');
+
+  let color_rgb = colorArr ? {
+    r: colorArr[0],
+    g: colorArr[1],
+    b: colorArr[2]
+  } : null;
+
+  return color_rgb;
+};
+
 /**
  * Draws a single waveform channel on a canvas context.
  *
@@ -210,6 +236,16 @@ WaveformShape.prototype._drawChannel = function(context, channel,
     let first_fft = Math.floor(time_offset * fft_per_sec);
     let last_fft = Math.floor(first_fft + canvas_fft_amount);
 
+    let color_rgb = this._color;
+
+    if (color_rgb.indexOf('#') === 0) {
+      color_rgb = this._convertHexToRGBArray(color_rgb);
+    }
+    else {
+      color_rgb = this._convertRGBAToRGBArray(color_rgb);
+    }
+
+
     for (let i = 0; i < data_height; i++) {
       let data_at_pixel = channel.frequency_array_at_index(i);
       let h = height / data_height;
@@ -222,7 +258,7 @@ WaveformShape.prototype._drawChannel = function(context, channel,
           let rat = data_at_x  / 255;
 
           context.beginPath();
-          context.strokeStyle = `rgba(0, 0, 0, ${rat})`;
+          context.strokeStyle = `rgba(${color_rgb.r}, ${color_rgb.g}, ${color_rgb.b}, ${rat})`;
 
           context.moveTo(start - frameOffset, height - (i * h));
           context.lineTo((start + fft_width) - frameOffset, height - (i * h));
