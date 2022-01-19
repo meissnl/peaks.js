@@ -15,7 +15,7 @@ import WaveformShape from './waveform-shape';
 // import AnimatedZoomAdapter from './animated-zoom-adapter';
 // import StaticZoomAdapter from './static-zoom-adapter';
 import { clamp, formatTime, isFinite, isNumber, isValidTime,
-    objectHasProperty } from './utils';
+  objectHasProperty } from './utils';
 import Konva from 'konva/lib/Core';
 
 /**
@@ -30,350 +30,350 @@ import Konva from 'konva/lib/Core';
  */
 
 function SpectrogramZoomView(spectrogramData, container, peaks) {
-    var self = this;
+  var self = this;
 
-    self._container = container;
-    self._peaks = peaks;
-    self._options = peaks.options;
-    self._viewOptions = self._options.zoomview;
-    self._enableSpectrogramCache = self._options.waveformCache;
+  self._container = container;
+  self._peaks = peaks;
+  self._options = peaks.options;
+  self._viewOptions = self._options.zoomview;
+  self._enableSpectrogramCache = self._options.waveformCache;
 
-    self._originalSpectrogramData = spectrogramData;
+  self._originalSpectrogramData = spectrogramData;
 
-    if (self._enableSpectrogramCache) {
-        self._spectrogramData = new Map();
-        self._spectrogramData.set(self._originalSpectrogramData.scale, self._originalSpectrogramData);
-        self._spectrogramScales = [self._originalSpectrogramData.scale];
-    }
+  if (self._enableSpectrogramCache) {
+    self._spectrogramData = new Map();
+    self._spectrogramData.set(self._originalSpectrogramData.scale, self._originalSpectrogramData);
+    self._spectrogramScales = [self._originalSpectrogramData.scale];
+  }
 
-    // Bind event handlers
-    self._onTimeUpdate = self._onTimeUpdate.bind(self);
-    self._onPlaying = self._onPlaying.bind(self);
-    self._onPause = self._onPause.bind(self);
-    self._onWindowResize = self._onWindowResize.bind(self);
-    self._onKeyboardLeft = self._onKeyboardLeft.bind(self);
-    self._onKeyboardRight = self._onKeyboardRight.bind(self);
-    self._onKeyboardShiftLeft  = self._onKeyboardShiftLeft.bind(self);
-    self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
+  // Bind event handlers
+  self._onTimeUpdate = self._onTimeUpdate.bind(self);
+  self._onPlaying = self._onPlaying.bind(self);
+  self._onPause = self._onPause.bind(self);
+  self._onWindowResize = self._onWindowResize.bind(self);
+  self._onKeyboardLeft = self._onKeyboardLeft.bind(self);
+  self._onKeyboardRight = self._onKeyboardRight.bind(self);
+  self._onKeyboardShiftLeft  = self._onKeyboardShiftLeft.bind(self);
+  self._onKeyboardShiftRight = self._onKeyboardShiftRight.bind(self);
 
-    // Register event handlers
-    self._peaks.on('player.timeupdate', self._onTimeUpdate);
-    self._peaks.on('player.playing', self._onPlaying);
-    self._peaks.on('player.pause', self._onPause);
-    self._peaks.on('window_resize', self._onWindowResize);
-    self._peaks.on('keyboard.left', self._onKeyboardLeft);
-    self._peaks.on('keyboard.right', self._onKeyboardRight);
-    self._peaks.on('keyboard.shift_left', self._onKeyboardShiftLeft);
-    self._peaks.on('keyboard.shift_right', self._onKeyboardShiftRight);
+  // Register event handlers
+  self._peaks.on('player.timeupdate', self._onTimeUpdate);
+  self._peaks.on('player.playing', self._onPlaying);
+  self._peaks.on('player.pause', self._onPause);
+  self._peaks.on('window_resize', self._onWindowResize);
+  self._peaks.on('keyboard.left', self._onKeyboardLeft);
+  self._peaks.on('keyboard.right', self._onKeyboardRight);
+  self._peaks.on('keyboard.shift_left', self._onKeyboardShiftLeft);
+  self._peaks.on('keyboard.shift_right', self._onKeyboardShiftRight);
 
-    self._enableAutoScroll = true;
-    self._amplitudeScale = 1.0;
-    self._timeLabelPrecision = self._viewOptions.timeLabelPrecision;
-    self._enableDragScroll = true;
-    self._enableSeek = true;
+  self._enableAutoScroll = true;
+  self._amplitudeScale = 1.0;
+  self._timeLabelPrecision = self._viewOptions.timeLabelPrecision;
+  self._enableDragScroll = true;
+  self._enableSeek = true;
 
-    if (self._viewOptions.formatPlayheadTime) {
-        self._formatPlayheadTime = self._viewOptions.formatPlayheadTime;
-    }
-    else {
-        self._formatPlayheadTime = function(time) {
-            return formatTime(time, self._timeLabelPrecision);
-        };
-    }
+  if (self._viewOptions.formatPlayheadTime) {
+    self._formatPlayheadTime = self._viewOptions.formatPlayheadTime;
+  }
+  else {
+    self._formatPlayheadTime = function(time) {
+      return formatTime(time, self._timeLabelPrecision);
+    };
+  }
 
-    self._data = null;
-    self._pixelLength = 0;
+  self._data = null;
+  self._pixelLength = 0;
 
-    var initialZoomLevel = peaks.zoom.getZoomLevel();
+  var initialZoomLevel = peaks.zoom.getZoomLevel();
 
-    self._zoomLevelAuto = false;
-    self._zoomLevelSeconds = null;
+  self._zoomLevelAuto = false;
+  self._zoomLevelSeconds = null;
 
-    self._resizeTimeoutId = null;
-    self._resampleData({ scale: initialZoomLevel });
+  self._resizeTimeoutId = null;
+  self._resampleData({ scale: initialZoomLevel });
 
-    self._width = container.clientWidth;
-    self._height = container.clientHeight;
+  self._width = container.clientWidth;
+  self._height = container.clientHeight;
 
-    // The pixel offset of the current frame being displayed
-    self._frameOffset = 0;
+  // The pixel offset of the current frame being displayed
+  self._frameOffset = 0;
 
-    self._stage = new Konva.Stage({
-        container: container,
-        width: self._width,
-        height: self._height
-    });
+  self._stage = new Konva.Stage({
+    container: container,
+    width: self._width,
+    height: self._height
+  });
 
-    self._spectrogramLayer = new Konva.Layer({ listening: false });
+  self._spectrogramLayer = new Konva.Layer({ listening: false });
 
-    self._waveformColor = self._viewOptions.waveformColor;
-    self._playedWaveformColor = self._viewOptions.playedWaveformColor;
+  self._waveformColor = self._viewOptions.waveformColor;
+  self._playedWaveformColor = self._viewOptions.playedWaveformColor;
 
-    self._createWaveform();
+  self._createWaveform();
 
-    self._segmentsLayer = new SegmentsLayer(peaks, self, true);
-    self._segmentsLayer.addToStage(self._stage);
+  self._segmentsLayer = new SegmentsLayer(peaks, self, true);
+  self._segmentsLayer.addToStage(self._stage);
 
-    self._pointsLayer = new PointsLayer(peaks, self, true);
-    self._pointsLayer.addToStage(self._stage);
+  self._pointsLayer = new PointsLayer(peaks, self, true);
+  self._pointsLayer.addToStage(self._stage);
 
-    self._createAxisLabels();
+  self._createAxisLabels();
 
-    self._playheadLayer = new PlayheadLayer({
-        player: self._peaks.player,
-        view: self,
-        showPlayheadTime: self._viewOptions.showPlayheadTime,
-        playheadColor: self._viewOptions.playheadColor,
-        playheadTextColor: self._viewOptions.playheadTextColor,
-        playheadFontFamily: self._viewOptions.fontFamily,
-        playheadFontSize: self._viewOptions.fontSize,
-        playheadFontStyle: self._viewOptions.fontStyle
-    });
+  self._playheadLayer = new PlayheadLayer({
+    player: self._peaks.player,
+    view: self,
+    showPlayheadTime: self._viewOptions.showPlayheadTime,
+    playheadColor: self._viewOptions.playheadColor,
+    playheadTextColor: self._viewOptions.playheadTextColor,
+    playheadFontFamily: self._viewOptions.fontFamily,
+    playheadFontSize: self._viewOptions.fontSize,
+    playheadFontStyle: self._viewOptions.fontStyle
+  });
 
-    self._playheadLayer.addToStage(self._stage);
+  self._playheadLayer.addToStage(self._stage);
 
-    var time = self._peaks.player.getCurrentTime();
+  var time = self._peaks.player.getCurrentTime();
 
-    self._syncPlayhead(time);
+  self._syncPlayhead(time);
 
-    self._createMouseDragHandler();
+  self._createMouseDragHandler();
 
-    self._onWheel = self._onWheel.bind(self);
-    self.setWheelMode(self._viewOptions.wheelMode);
+  self._onWheel = self._onWheel.bind(self);
+  self.setWheelMode(self._viewOptions.wheelMode);
 
-    self._onClick = self._onClick.bind(this);
-    self._onDblClick = self._onDblClick.bind(this);
+  self._onClick = self._onClick.bind(this);
+  self._onDblClick = self._onDblClick.bind(this);
 
-    self._stage.on('click', self._onClick);
-    self._stage.on('dblclick', self._onDblClick);
+  self._stage.on('click', self._onClick);
+  self._stage.on('dblclick', self._onDblClick);
 }
 
 SpectrogramZoomView.prototype._createMouseDragHandler = function() {
-    var self = this;
+  var self = this;
 
-    self._mouseDragHandler = new MouseDragHandler(self._stage, {
-        onMouseDown: function(mousePosX) {
-            this.initialFrameOffset = self._frameOffset;
-            this.mouseDownX = mousePosX;
-        },
+  self._mouseDragHandler = new MouseDragHandler(self._stage, {
+    onMouseDown: function(mousePosX) {
+      this.initialFrameOffset = self._frameOffset;
+      this.mouseDownX = mousePosX;
+    },
 
-        onMouseMove: function(mousePosX) {
-            // Moving the mouse to the left increases the time position of the
-            // left-hand edge of the visible waveform.
-            var diff = this.mouseDownX - mousePosX;
-            var newFrameOffset = this.initialFrameOffset + diff;
+    onMouseMove: function(mousePosX) {
+      // Moving the mouse to the left increases the time position of the
+      // left-hand edge of the visible waveform.
+      var diff = this.mouseDownX - mousePosX;
+      var newFrameOffset = this.initialFrameOffset + diff;
 
-            if (self._enableDragScroll && newFrameOffset !== this.initialFrameOffset) {
-                self._updateWaveform(newFrameOffset);
-            }
-        },
+      if (self._enableDragScroll && newFrameOffset !== this.initialFrameOffset) {
+        self._updateWaveform(newFrameOffset);
+      }
+    },
 
-        onMouseUp: function(/* mousePosX */) {
-            // Set playhead position only on click release, when not dragging.
-            if (self._enableSeek && !self._mouseDragHandler.isDragging()) {
-                var time = self.pixelOffsetToTime(this.mouseDownX);
-                var duration = self._getDuration();
+    onMouseUp: function(/* mousePosX */) {
+      // Set playhead position only on click release, when not dragging.
+      if (self._enableSeek && !self._mouseDragHandler.isDragging()) {
+        var time = self.pixelOffsetToTime(this.mouseDownX);
+        var duration = self._getDuration();
 
-                // Prevent the playhead position from jumping by limiting click
-                // handling to the waveform duration.
-                if (time > duration) {
-                    time = duration;
-                }
-
-                self._playheadLayer.updatePlayheadTime(time);
-
-                self._peaks.player.seek(time);
-            }
+        // Prevent the playhead position from jumping by limiting click
+        // handling to the waveform duration.
+        if (time > duration) {
+          time = duration;
         }
-    });
+
+        self._playheadLayer.updatePlayheadTime(time);
+
+        self._peaks.player.seek(time);
+      }
+    }
+  });
 };
 
 SpectrogramZoomView.prototype.enableDragScroll = function(enable) {
-    this._enableDragScroll = enable;
+  this._enableDragScroll = enable;
 };
 
 SpectrogramZoomView.prototype.enableSeek = function(enable) {
-    this._enableSeek = enable;
+  this._enableSeek = enable;
 };
 
 SpectrogramZoomView.prototype._onClick = function(event) {
-    this._clickHandler(event, 'zoomview.click');
+  this._clickHandler(event, 'zoomview.click');
 };
 
 SpectrogramZoomView.prototype._onDblClick = function(event) {
-    this._clickHandler(event, 'zoomview.dblclick');
+  this._clickHandler(event, 'zoomview.dblclick');
 };
 
 SpectrogramZoomView.prototype._clickHandler = function(event, eventName) {
-    var mousePosX = event.evt.layerX;
-    var time = this.pixelOffsetToTime(mousePosX);
+  var mousePosX = event.evt.layerX;
+  var time = this.pixelOffsetToTime(mousePosX);
 
-    this._peaks.emit(eventName, time);
+  this._peaks.emit(eventName, time);
 };
 
 SpectrogramZoomView.prototype.setWheelMode = function(mode) {
-    if (mode !== this._wheelMode) {
-        this._wheelMode = mode;
+  if (mode !== this._wheelMode) {
+    this._wheelMode = mode;
 
-        switch (mode) {
-            case 'scroll':
-                this._stage.on('wheel', this._onWheel);
-                break;
+    switch (mode) {
+      case 'scroll':
+        this._stage.on('wheel', this._onWheel);
+        break;
 
-            case 'none':
-                this._stage.off('wheel');
-                break;
-        }
+      case 'none':
+        this._stage.off('wheel');
+        break;
     }
+  }
 };
 
 SpectrogramZoomView.prototype._onWheel = function(event) {
-    var wheelEvent = event.evt;
-    var delta = wheelEvent.shiftKey ? wheelEvent.deltaY : wheelEvent.deltaX;
-    var offAxisDelta = wheelEvent.shiftKey ? wheelEvent.deltaX : wheelEvent.deltaY;
+  var wheelEvent = event.evt;
+  var delta = wheelEvent.shiftKey ? wheelEvent.deltaY : wheelEvent.deltaX;
+  var offAxisDelta = wheelEvent.shiftKey ? wheelEvent.deltaX : wheelEvent.deltaY;
 
-    // Ignore the event if it looks like the user is scrolling vertically
-    // down the page
-    if (Math.abs(delta) < Math.abs(offAxisDelta)) {
-        return;
-    }
+  // Ignore the event if it looks like the user is scrolling vertically
+  // down the page
+  if (Math.abs(delta) < Math.abs(offAxisDelta)) {
+    return;
+  }
 
-    event.evt.preventDefault();
+  event.evt.preventDefault();
 
-    var newFrameOffset = clamp(
-        this._frameOffset + Math.floor(delta), 0, this._pixelLength - this._width
-    );
+  var newFrameOffset = clamp(
+    this._frameOffset + Math.floor(delta), 0, this._pixelLength - this._width
+  );
 
-    this._updateWaveform(newFrameOffset);
+  this._updateWaveform(newFrameOffset);
 };
 
 SpectrogramZoomView.prototype.getName = function() {
-    return 'zoomview';
+  return 'zoomview';
 };
 
 SpectrogramZoomView.prototype._onTimeUpdate = function(time) {
-    if (this._mouseDragHandler.isDragging()) {
-        return;
-    }
+  if (this._mouseDragHandler.isDragging()) {
+    return;
+  }
 
-    this._syncPlayhead(time);
+  this._syncPlayhead(time);
 };
 
 SpectrogramZoomView.prototype._onPlaying = function(time) {
-    this._playheadLayer.updatePlayheadTime(time);
+  this._playheadLayer.updatePlayheadTime(time);
 };
 
 SpectrogramZoomView.prototype._onPause = function(time) {
-    this._playheadLayer.stop(time);
+  this._playheadLayer.stop(time);
 };
 
 SpectrogramZoomView.prototype._onWindowResize = function() {
-    var self = this;
+  var self = this;
 
-    var width = self._container.clientWidth;
+  var width = self._container.clientWidth;
 
-    if (!self._zoomLevelAuto) {
+  if (!self._zoomLevelAuto) {
+    self._width = width;
+    self._stage.width(width);
+    self._updateWaveform(self._frameOffset);
+  }
+  else {
+    if (self._resizeTimeoutId) {
+      clearTimeout(self._resizeTimeoutId);
+      self._resizeTimeoutId = null;
+    }
+
+    // Avoid resampling waveform data to zero width
+    if (width !== 0) {
+      self._width = width;
+      self._stage.width(width);
+
+      self._resizeTimeoutId = setTimeout(function() {
         self._width = width;
+        self._data = self._originalSpectrogramData.resample(width);
         self._stage.width(width);
+
         self._updateWaveform(self._frameOffset);
+      }, 500);
     }
-    else {
-        if (self._resizeTimeoutId) {
-            clearTimeout(self._resizeTimeoutId);
-            self._resizeTimeoutId = null;
-        }
-
-        // Avoid resampling waveform data to zero width
-        if (width !== 0) {
-            self._width = width;
-            self._stage.width(width);
-
-            self._resizeTimeoutId = setTimeout(function() {
-                self._width = width;
-                self._data = self._originalSpectrogramData.resample(width);
-                self._stage.width(width);
-
-                self._updateWaveform(self._frameOffset);
-            }, 500);
-        }
-    }
+  }
 };
 
 SpectrogramZoomView.prototype._onKeyboardLeft = function() {
-    this._keyboardScroll(-1, false);
+  this._keyboardScroll(-1, false);
 };
 
 SpectrogramZoomView.prototype._onKeyboardRight = function() {
-    this._keyboardScroll(1, false);
+  this._keyboardScroll(1, false);
 };
 
 SpectrogramZoomView.prototype._onKeyboardShiftLeft = function() {
-    this._keyboardScroll(-1, true);
+  this._keyboardScroll(-1, true);
 };
 
 SpectrogramZoomView.prototype._onKeyboardShiftRight = function() {
-    this._keyboardScroll(1, true);
+  this._keyboardScroll(1, true);
 };
 
 SpectrogramZoomView.prototype._keyboardScroll = function(direction, large) {
-    var increment;
+  var increment;
 
-    if (large) {
-        increment = direction * this._width;
-    }
-    else {
-        increment = direction * this.timeToPixels(this._options.nudgeIncrement);
-    }
+  if (large) {
+    increment = direction * this._width;
+  }
+  else {
+    increment = direction * this.timeToPixels(this._options.nudgeIncrement);
+  }
 
-    this.scrollWaveform({ pixels: increment });
+  this.scrollWaveform({ pixels: increment });
 };
 
 SpectrogramZoomView.prototype.setWaveformData = function(waveformData) {
-    this._originalWaveformData = waveformData;
-    // Don't update the UI here, call setZoom().
+  this._originalWaveformData = waveformData;
+  // Don't update the UI here, call setZoom().
 };
 
 SpectrogramZoomView.prototype.playheadPosChanged = function(time) {
-    if (this._playedWaveformShape) {
-        this._playedSegment.endTime = time;
-        this._unplayedSegment.startTime = time;
+  if (this._playedWaveformShape) {
+    this._playedSegment.endTime = time;
+    this._unplayedSegment.startTime = time;
 
-        this._drawWaveformLayer();
-    }
+    this._drawWaveformLayer();
+  }
 };
 
 SpectrogramZoomView.prototype._syncPlayhead = function(time) {
-    this._playheadLayer.updatePlayheadTime(time);
+  this._playheadLayer.updatePlayheadTime(time);
 
-    if (this._enableAutoScroll) {
-        // Check for the playhead reaching the right-hand side of the window.
+  if (this._enableAutoScroll) {
+    // Check for the playhead reaching the right-hand side of the window.
 
-        var pixelIndex = this.timeToPixels(time);
+    var pixelIndex = this.timeToPixels(time);
 
-        // TODO: move this code to animation function?
-        // TODO: don't scroll if user has positioned view manually (e.g., using
-        // the keyboard)
-        var endThreshold = this._frameOffset + this._width - 100;
+    // TODO: move this code to animation function?
+    // TODO: don't scroll if user has positioned view manually (e.g., using
+    // the keyboard)
+    var endThreshold = this._frameOffset + this._width - 100;
 
-        if (pixelIndex >= endThreshold || pixelIndex < this._frameOffset) {
-            // Put the playhead at 100 pixels from the left edge
-            this._frameOffset = pixelIndex - 100;
+    if (pixelIndex >= endThreshold || pixelIndex < this._frameOffset) {
+      // Put the playhead at 100 pixels from the left edge
+      this._frameOffset = pixelIndex - 100;
 
-            if (this._frameOffset < 0) {
-                this._frameOffset = 0;
-            }
+      if (this._frameOffset < 0) {
+        this._frameOffset = 0;
+      }
 
-            this._updateWaveform(this._frameOffset);
-        }
+      this._updateWaveform(this._frameOffset);
     }
+  }
 };
 
 SpectrogramZoomView.prototype._getScale = function(duration) {
-    return duration * this._data.sample_rate / this._width;
+  return duration * this._data.sample_rate / this._width;
 };
 
 function isAutoScale(options) {
-    return ((objectHasProperty(options, 'scale') && options.scale === 'auto') ||
+  return ((objectHasProperty(options, 'scale') && options.scale === 'auto') ||
         (objectHasProperty(options, 'seconds') && options.seconds === 'auto'));
 }
 
@@ -396,136 +396,136 @@ function isAutoScale(options) {
  */
 
 SpectrogramZoomView.prototype.setZoom = function(options) {
-    var scale;
+  var scale;
 
-    if (isAutoScale(options)) {
-        var seconds = this._peaks.player.getDuration();
+  if (isAutoScale(options)) {
+    var seconds = this._peaks.player.getDuration();
 
-        if (!isValidTime(seconds)) {
-            return false;
-        }
-
-        this._zoomLevelAuto = true;
-        this._zoomLevelSeconds = null;
-        scale = this._getScale(seconds);
-    }
-    else {
-        if (objectHasProperty(options, 'scale')) {
-            this._zoomLevelSeconds = null;
-            scale = options.scale;
-        }
-        else if (objectHasProperty(options, 'seconds')) {
-            if (!isValidTime(options.seconds)) {
-                return false;
-            }
-
-            this._zoomLevelSeconds = options.seconds;
-            scale = this._getScale(options.seconds);
-        }
-
-        this._zoomLevelAuto = false;
+    if (!isValidTime(seconds)) {
+      return false;
     }
 
-    if (scale < this._originalSpectrogramData.scale) {
-        // eslint-disable-next-line max-len
-        this._peaks._logger('peaks.zoomview.setZoom(): zoom level must be at least ' + this._originalSpectrogramData.scale);
-        scale = this._originalSpectrogramData.scale;
+    this._zoomLevelAuto = true;
+    this._zoomLevelSeconds = null;
+    scale = this._getScale(seconds);
+  }
+  else {
+    if (objectHasProperty(options, 'scale')) {
+      this._zoomLevelSeconds = null;
+      scale = options.scale;
+    }
+    else if (objectHasProperty(options, 'seconds')) {
+      if (!isValidTime(options.seconds)) {
+        return false;
+      }
+
+      this._zoomLevelSeconds = options.seconds;
+      scale = this._getScale(options.seconds);
     }
 
-    var currentTime = this._peaks.player.getCurrentTime();
-    var apexTime;
-    var playheadOffsetPixels = this._playheadLayer.getPlayheadOffset();
+    this._zoomLevelAuto = false;
+  }
 
-    if (playheadOffsetPixels >= 0 && playheadOffsetPixels < this._width) {
-        // Playhead is visible. Change the zoom level while keeping the
-        // playhead at the same position in the window.
-        apexTime = currentTime;
-    }
-    else {
-        // Playhead is not visible. Change the zoom level while keeping the
-        // centre of the window at the same position in the waveform.
-        playheadOffsetPixels = Math.floor(this._width / 2);
-        apexTime = this.pixelOffsetToTime(playheadOffsetPixels);
-    }
+  if (scale < this._originalSpectrogramData.scale) {
+    // eslint-disable-next-line max-len
+    this._peaks._logger('peaks.zoomview.setZoom(): zoom level must be at least ' + this._originalSpectrogramData.scale);
+    scale = this._originalSpectrogramData.scale;
+  }
 
-    var prevScale = this._scale;
+  var currentTime = this._peaks.player.getCurrentTime();
+  var apexTime;
+  var playheadOffsetPixels = this._playheadLayer.getPlayheadOffset();
 
-    this._resampleData({ scale: scale });
+  if (playheadOffsetPixels >= 0 && playheadOffsetPixels < this._width) {
+    // Playhead is visible. Change the zoom level while keeping the
+    // playhead at the same position in the window.
+    apexTime = currentTime;
+  }
+  else {
+    // Playhead is not visible. Change the zoom level while keeping the
+    // centre of the window at the same position in the waveform.
+    playheadOffsetPixels = Math.floor(this._width / 2);
+    apexTime = this.pixelOffsetToTime(playheadOffsetPixels);
+  }
 
-    var apexPixel = this.timeToPixels(apexTime);
+  var prevScale = this._scale;
 
-    this._frameOffset = apexPixel - playheadOffsetPixels;
+  this._resampleData({ scale: scale });
 
-    this._updateWaveform(this._frameOffset);
+  var apexPixel = this.timeToPixels(apexTime);
 
-    this._playheadLayer.zoomLevelChanged();
+  this._frameOffset = apexPixel - playheadOffsetPixels;
 
-    // Update the playhead position after zooming.
-    this._playheadLayer.updatePlayheadTime(currentTime);
+  this._updateWaveform(this._frameOffset);
 
-    // var adapter = this.createZoomAdapter(currentScale, previousScale);
+  this._playheadLayer.zoomLevelChanged();
 
-    // adapter.start(relativePosition);
+  // Update the playhead position after zooming.
+  this._playheadLayer.updatePlayheadTime(currentTime);
 
-    this._peaks.emit('zoom.update', scale, prevScale);
+  // var adapter = this.createZoomAdapter(currentScale, previousScale);
 
-    return true;
+  // adapter.start(relativePosition);
+
+  this._peaks.emit('zoom.update', scale, prevScale);
+
+  return true;
 };
 
 SpectrogramZoomView.prototype._resampleData = function(options) {
-    var scale = options.scale;
+  var scale = options.scale;
 
-    if (this._enableSpectrogramCache) {
-        if (!this._spectrogramData.has(scale)) {
-            var sourceWaveform = this._originalSpectrogramData;
+  if (this._enableSpectrogramCache) {
+    if (!this._spectrogramData.has(scale)) {
+      var sourceWaveform = this._originalSpectrogramData;
 
-            // Resample from the next lowest available zoom level
+      // Resample from the next lowest available zoom level
 
-            for (var  i = 0; i < this._spectrogramScales.length; i++) {
-                if (this._spectrogramScales[i] < scale) {
-                    sourceWaveform = this._spectrogramData.get(this._spectrogramScales[i]);
-                }
-                else {
-                    break;
-                }
-            }
-
-            this._spectrogramData.set(scale, sourceWaveform.resample(options));
-
-            this._spectrogramScales.push(scale);
-            this._spectrogramScales.sort(function(a, b) {
-                return a - b; // Ascending order
-            });
+      for (var  i = 0; i < this._spectrogramScales.length; i++) {
+        if (this._spectrogramScales[i] < scale) {
+          sourceWaveform = this._spectrogramData.get(this._spectrogramScales[i]);
         }
+        else {
+          break;
+        }
+      }
 
-        this._data = this._spectrogramData.get(scale);
-    }
-    else {
-        this._data = this._originalSpectrogramData.resample(options);
+      this._spectrogramData.set(scale, sourceWaveform.resample(options));
+
+      this._spectrogramScales.push(scale);
+      this._spectrogramScales.sort(function(a, b) {
+        return a - b; // Ascending order
+      });
     }
 
-    this._scale = this._data.scale;
-    this._pixelLength = this._data.length;
+    this._data = this._spectrogramData.get(scale);
+  }
+  else {
+    this._data = this._originalSpectrogramData.resample(options);
+  }
+
+  this._scale = this._data.scale;
+  this._pixelLength = this._data.length;
 };
 
 SpectrogramZoomView.prototype.getStartTime = function() {
-    return this.pixelOffsetToTime(0);
+  return this.pixelOffsetToTime(0);
 };
 
 SpectrogramZoomView.prototype.getEndTime = function() {
-    return this.pixelOffsetToTime(this._width);
+  return this.pixelOffsetToTime(this._width);
 };
 
 SpectrogramZoomView.prototype.setStartTime = function(time) {
-    if (time < 0) {
-        time = 0;
-    }
+  if (time < 0) {
+    time = 0;
+  }
 
-    if (this._zoomLevelAuto) {
-        time = 0;
-    }
+  if (this._zoomLevelAuto) {
+    time = 0;
+  }
 
-    this._updateWaveform(this.timeToPixels(time));
+  this._updateWaveform(this.timeToPixels(time));
 };
 
 /**
@@ -536,7 +536,7 @@ SpectrogramZoomView.prototype.setStartTime = function(time) {
  */
 
 SpectrogramZoomView.prototype.timeToPixels = function(time) {
-    return Math.floor(time * this._data.sample_rate / this._data.scale);
+  return Math.floor(time * this._data.sample_rate / this._data.scale);
 };
 
 /**
@@ -547,7 +547,7 @@ SpectrogramZoomView.prototype.timeToPixels = function(time) {
  */
 
 SpectrogramZoomView.prototype.pixelsToTime = function(pixels) {
-    return pixels * this._data.scale / this._data.sample_rate;
+  return pixels * this._data.scale / this._data.sample_rate;
 };
 
 /**
@@ -559,9 +559,9 @@ SpectrogramZoomView.prototype.pixelsToTime = function(pixels) {
  */
 
 SpectrogramZoomView.prototype.pixelOffsetToTime = function(offset) {
-    var pixels = this._frameOffset + offset;
+  var pixels = this._frameOffset + offset;
 
-    return pixels * this._data.scale / this._data.sample_rate;
+  return pixels * this._data.scale / this._data.sample_rate;
 };
 
 /* var zoomAdapterMap = {
@@ -585,7 +585,7 @@ SpectrogramZoomView.prototype.createZoomAdapter = function(currentScale, previou
  */
 
 SpectrogramZoomView.prototype.getFrameOffset = function() {
-    return this._frameOffset;
+  return this._frameOffset;
 };
 
 /**
@@ -593,7 +593,7 @@ SpectrogramZoomView.prototype.getFrameOffset = function() {
  */
 
 SpectrogramZoomView.prototype.getWidth = function() {
-    return this._width;
+  return this._width;
 };
 
 /**
@@ -601,7 +601,7 @@ SpectrogramZoomView.prototype.getWidth = function() {
  */
 
 SpectrogramZoomView.prototype.getHeight = function() {
-    return this._height;
+  return this._height;
 };
 
 /**
@@ -609,7 +609,7 @@ SpectrogramZoomView.prototype.getHeight = function() {
  */
 
 SpectrogramZoomView.prototype._getDuration = function() {
-    return this._peaks.player.getDuration();
+  return this._peaks.player.getDuration();
 };
 
 /**
@@ -620,18 +620,18 @@ SpectrogramZoomView.prototype._getDuration = function() {
  */
 
 SpectrogramZoomView.prototype.setAmplitudeScale = function(scale) {
-    if (!isNumber(scale) || !isFinite(scale)) {
-        throw new Error('view.setAmplitudeScale(): Scale must be a valid number');
-    }
+  if (!isNumber(scale) || !isFinite(scale)) {
+    throw new Error('view.setAmplitudeScale(): Scale must be a valid number');
+  }
 
-    this._amplitudeScale = scale;
+  this._amplitudeScale = scale;
 
-    this._drawWaveformLayer();
-    this._segmentsLayer.draw();
+  this._drawWaveformLayer();
+  this._segmentsLayer.draw();
 };
 
 SpectrogramZoomView.prototype.getAmplitudeScale = function() {
-    return this._amplitudeScale;
+  return this._amplitudeScale;
 };
 
 /**
@@ -639,68 +639,68 @@ SpectrogramZoomView.prototype.getAmplitudeScale = function() {
  */
 
 SpectrogramZoomView.prototype.getWaveformData = function() {
-    return this._data;
+  return this._data;
 };
 
 SpectrogramZoomView.prototype._createWaveformShapes = function() {
-    if (!this._waveformShape) {
-        this._waveformShape = new WaveformShape({
-            color: this._waveformColor,
-            view: this
-        });
+  if (!this._waveformShape) {
+    this._waveformShape = new WaveformShape({
+      color: this._waveformColor,
+      view: this
+    });
 
-        this._waveformShape.addToLayer(this._spectrogramLayer);
-    }
+    this._waveformShape.addToLayer(this._spectrogramLayer);
+  }
 
-    if (this._playedWaveformColor && !this._playedWaveformShape) {
-        var time = this._peaks.player.getCurrentTime();
+  if (this._playedWaveformColor && !this._playedWaveformShape) {
+    var time = this._peaks.player.getCurrentTime();
 
-        this._playedSegment = {
-            startTime: 0,
-            endTime: time
-        };
+    this._playedSegment = {
+      startTime: 0,
+      endTime: time
+    };
 
-        this._unplayedSegment = {
-            startTime: time,
-            endTime: this._getDuration()
-        };
+    this._unplayedSegment = {
+      startTime: time,
+      endTime: this._getDuration()
+    };
 
-        this._waveformShape.setSegment(this._unplayedSegment);
+    this._waveformShape.setSegment(this._unplayedSegment);
 
-        this._playedWaveformShape = new WaveformShape({
-            color: this._playedWaveformColor,
-            view: this,
-            segment: this._playedSegment
-        });
+    this._playedWaveformShape = new WaveformShape({
+      color: this._playedWaveformColor,
+      view: this,
+      segment: this._playedSegment
+    });
 
-        this._playedWaveformShape.addToLayer(this._spectrogramLayer);
-    }
+    this._playedWaveformShape.addToLayer(this._spectrogramLayer);
+  }
 };
 
 SpectrogramZoomView.prototype._destroyPlayedWaveformShape = function() {
-    this._waveformShape.setSegment(null);
+  this._waveformShape.setSegment(null);
 
-    this._playedWaveformShape.destroy();
-    this._playedWaveformShape = null;
+  this._playedWaveformShape.destroy();
+  this._playedWaveformShape = null;
 
-    this._playedSegment = null;
-    this._unplayedSegment = null;
+  this._playedSegment = null;
+  this._unplayedSegment = null;
 };
 
 SpectrogramZoomView.prototype._createWaveform = function() {
-    this._createWaveformShapes();
+  this._createWaveformShapes();
 
-    this._stage.add(this._spectrogramLayer);
+  this._stage.add(this._spectrogramLayer);
 
-    this._peaks.emit('zoomview.displaying', 0, this.getEndTime());
+  this._peaks.emit('zoomview.displaying', 0, this.getEndTime());
 };
 
 SpectrogramZoomView.prototype._createAxisLabels = function() {
-    this._axisLayer = new Konva.Layer({ listening: false });
-    this._axis = new WaveformAxis(this, this._viewOptions);
+  this._axisLayer = new Konva.Layer({ listening: false });
+  this._axis = new WaveformAxis(this, this._viewOptions);
 
-    this._axis.addToLayer(this._axisLayer);
-    this._stage.add(this._axisLayer);
+  this._axis.addToLayer(this._axisLayer);
+  this._stage.add(this._axisLayer);
 };
 
 /**
@@ -710,19 +710,19 @@ SpectrogramZoomView.prototype._createAxisLabels = function() {
  */
 
 SpectrogramZoomView.prototype.scrollWaveform = function(options) {
-    var scrollAmount;
+  var scrollAmount;
 
-    if (objectHasProperty(options, 'pixels')) {
-        scrollAmount = Math.floor(options.pixels);
-    }
-    else if (objectHasProperty(options, 'seconds')) {
-        scrollAmount = this.timeToPixels(options.seconds);
-    }
-    else {
-        throw new TypeError('view.scrollWaveform(): Missing umber of pixels or seconds');
-    }
+  if (objectHasProperty(options, 'pixels')) {
+    scrollAmount = Math.floor(options.pixels);
+  }
+  else if (objectHasProperty(options, 'seconds')) {
+    scrollAmount = this.timeToPixels(options.seconds);
+  }
+  else {
+    throw new TypeError('view.scrollWaveform(): Missing umber of pixels or seconds');
+  }
 
-    this._updateWaveform(this._frameOffset + scrollAmount);
+  this._updateWaveform(this._frameOffset + scrollAmount);
 };
 
 /**
@@ -732,139 +732,139 @@ SpectrogramZoomView.prototype.scrollWaveform = function(options) {
  */
 
 SpectrogramZoomView.prototype._updateWaveform = function(frameOffset) {
-    var upperLimit;
+  var upperLimit;
 
-    if (this._pixelLength < this._width) {
-        // Total waveform is shorter than viewport, so reset the offset to 0.
-        frameOffset = 0;
-        upperLimit = this._width;
-    }
-    else {
-        // Calculate the very last possible position.
-        upperLimit = this._pixelLength - this._width;
-    }
+  if (this._pixelLength < this._width) {
+    // Total waveform is shorter than viewport, so reset the offset to 0.
+    frameOffset = 0;
+    upperLimit = this._width;
+  }
+  else {
+    // Calculate the very last possible position.
+    upperLimit = this._pixelLength - this._width;
+  }
 
-    frameOffset = clamp(frameOffset, 0, upperLimit);
+  frameOffset = clamp(frameOffset, 0, upperLimit);
 
-    this._frameOffset = frameOffset;
+  this._frameOffset = frameOffset;
 
-    // Display playhead if it is within the zoom frame width.
-    var playheadPixel = this._playheadLayer.getPlayheadPixel();
+  // Display playhead if it is within the zoom frame width.
+  var playheadPixel = this._playheadLayer.getPlayheadPixel();
 
-    this._playheadLayer.updatePlayheadTime(this.pixelsToTime(playheadPixel));
+  this._playheadLayer.updatePlayheadTime(this.pixelsToTime(playheadPixel));
 
-    this._drawWaveformLayer();
-    this._axisLayer.draw();
+  this._drawWaveformLayer();
+  this._axisLayer.draw();
 
-    var frameStartTime = this.getStartTime();
-    var frameEndTime   = this.getEndTime();
+  var frameStartTime = this.getStartTime();
+  var frameEndTime   = this.getEndTime();
 
-    this._pointsLayer.updatePoints(frameStartTime, frameEndTime);
-    this._segmentsLayer.updateSegments(frameStartTime, frameEndTime);
+  this._pointsLayer.updatePoints(frameStartTime, frameEndTime);
+  this._segmentsLayer.updateSegments(frameStartTime, frameEndTime);
 
-    this._peaks.emit('zoomview.displaying', frameStartTime, frameEndTime);
+  this._peaks.emit('zoomview.displaying', frameStartTime, frameEndTime);
 };
 
 SpectrogramZoomView.prototype._drawWaveformLayer = function() {
-    this._spectrogramLayer.draw();
+  this._spectrogramLayer.draw();
 };
 
 SpectrogramZoomView.prototype.setWaveformColor = function(color) {
-    this._waveformColor = color;
-    this._waveformShape.setWaveformColor(color);
+  this._waveformColor = color;
+  this._waveformShape.setWaveformColor(color);
 };
 
 SpectrogramZoomView.prototype.setPlayedWaveformColor = function(color) {
-    this._playedWaveformColor = color;
+  this._playedWaveformColor = color;
 
-    if (color) {
-        if (!this._playedWaveformShape) {
-            this._createWaveformShapes();
-        }
+  if (color) {
+    if (!this._playedWaveformShape) {
+      this._createWaveformShapes();
+    }
 
-        this._playedWaveformShape.setWaveformColor(color);
+    this._playedWaveformShape.setWaveformColor(color);
+  }
+  else {
+    if (this._playedWaveformShape) {
+      this._destroyPlayedWaveformShape();
     }
-    else {
-        if (this._playedWaveformShape) {
-            this._destroyPlayedWaveformShape();
-        }
-    }
+  }
 };
 
 SpectrogramZoomView.prototype.showPlayheadTime = function(show) {
-    this._playheadLayer.showPlayheadTime(show);
+  this._playheadLayer.showPlayheadTime(show);
 };
 
 SpectrogramZoomView.prototype.setTimeLabelPrecision = function(precision) {
-    this._timeLabelPrecision = precision;
-    this._playheadLayer.updatePlayheadText();
+  this._timeLabelPrecision = precision;
+  this._playheadLayer.updatePlayheadText();
 };
 
 SpectrogramZoomView.prototype.formatTime = function(time) {
-    return this._formatPlayheadTime(time);
+  return this._formatPlayheadTime(time);
 };
 
 SpectrogramZoomView.prototype.showAxisLabels = function(show) {
-    this._axis.showAxisLabels(show);
-    this._axisLayer.draw();
+  this._axis.showAxisLabels(show);
+  this._axisLayer.draw();
 };
 
 SpectrogramZoomView.prototype.enableAutoScroll = function(enable) {
-    this._enableAutoScroll = enable;
+  this._enableAutoScroll = enable;
 };
 
 SpectrogramZoomView.prototype.enableMarkerEditing = function(enable) {
-    this._segmentsLayer.enableEditing(enable);
-    this._pointsLayer.enableEditing(enable);
+  this._segmentsLayer.enableEditing(enable);
+  this._pointsLayer.enableEditing(enable);
 };
 
 SpectrogramZoomView.prototype.fitToContainer = function() {
-    if (this._container.clientWidth === 0 && this._container.clientHeight === 0) {
-        return;
+  if (this._container.clientWidth === 0 && this._container.clientHeight === 0) {
+    return;
+  }
+
+  var updateWaveform = false;
+
+  if (this._container.clientWidth !== this._width) {
+    this._width = this._container.clientWidth;
+    this._stage.width(this._width);
+
+    var resample = false;
+    var resampleOptions;
+
+    if (this._zoomLevelAuto) {
+      resample = true;
+      resampleOptions = { width: this._width };
+    }
+    else if (this._zoomLevelSeconds !== null) {
+      resample = true;
+      resampleOptions = { scale: this._getScale(this._zoomLevelSeconds) };
     }
 
-    var updateWaveform = false;
-
-    if (this._container.clientWidth !== this._width) {
-        this._width = this._container.clientWidth;
-        this._stage.width(this._width);
-
-        var resample = false;
-        var resampleOptions;
-
-        if (this._zoomLevelAuto) {
-            resample = true;
-            resampleOptions = { width: this._width };
-        }
-        else if (this._zoomLevelSeconds !== null) {
-            resample = true;
-            resampleOptions = { scale: this._getScale(this._zoomLevelSeconds) };
-        }
-
-        if (resample) {
-            try {
-                this._resampleData(resampleOptions);
-                updateWaveform = true;
-            }
-            catch (error) {
-                // Ignore, and leave this._data as it was
-            }
-        }
+    if (resample) {
+      try {
+        this._resampleData(resampleOptions);
+        updateWaveform = true;
+      }
+      catch (error) {
+        // Ignore, and leave this._data as it was
+      }
     }
+  }
 
-    this._height = this._container.clientHeight;
-    this._stage.height(this._height);
+  this._height = this._container.clientHeight;
+  this._stage.height(this._height);
 
-    this._waveformShape.fitToView();
-    this._playheadLayer.fitToView();
-    this._segmentsLayer.fitToView();
-    this._pointsLayer.fitToView();
+  this._waveformShape.fitToView();
+  this._playheadLayer.fitToView();
+  this._segmentsLayer.fitToView();
+  this._pointsLayer.fitToView();
 
-    if (updateWaveform) {
-        this._updateWaveform(this._frameOffset);
-    }
+  if (updateWaveform) {
+    this._updateWaveform(this._frameOffset);
+  }
 
-    this._stage.draw();
+  this._stage.draw();
 };
 
 /* SpectrogramZoomView.prototype.beginZoom = function() {
@@ -895,29 +895,29 @@ SpectrogramZoomView.prototype.endZoom = function() {
 }; */
 
 SpectrogramZoomView.prototype.destroy = function() {
-    if (this._resizeTimeoutId) {
-        clearTimeout(this._resizeTimeoutId);
-        this._resizeTimeoutId = null;
-    }
+  if (this._resizeTimeoutId) {
+    clearTimeout(this._resizeTimeoutId);
+    this._resizeTimeoutId = null;
+  }
 
-    // Unregister event handlers
-    this._peaks.off('player.timeupdate', this._onTimeUpdate);
-    this._peaks.off('player.playing', this._onPlaying);
-    this._peaks.off('player.pause', this._onPause);
-    this._peaks.off('window_resize', this._onWindowResize);
-    this._peaks.off('keyboard.left', this._onKeyboardLeft);
-    this._peaks.off('keyboard.right', this._onKeyboardRight);
-    this._peaks.off('keyboard.shift_left', this._onKeyboardShiftLeft);
-    this._peaks.off('keyboard.shift_right', this._onKeyboardShiftRight);
+  // Unregister event handlers
+  this._peaks.off('player.timeupdate', this._onTimeUpdate);
+  this._peaks.off('player.playing', this._onPlaying);
+  this._peaks.off('player.pause', this._onPause);
+  this._peaks.off('window_resize', this._onWindowResize);
+  this._peaks.off('keyboard.left', this._onKeyboardLeft);
+  this._peaks.off('keyboard.right', this._onKeyboardRight);
+  this._peaks.off('keyboard.shift_left', this._onKeyboardShiftLeft);
+  this._peaks.off('keyboard.shift_right', this._onKeyboardShiftRight);
 
-    this._playheadLayer.destroy();
-    this._segmentsLayer.destroy();
-    this._pointsLayer.destroy();
+  this._playheadLayer.destroy();
+  this._segmentsLayer.destroy();
+  this._pointsLayer.destroy();
 
-    if (this._stage) {
-        this._stage.destroy();
-        this._stage = null;
-    }
+  if (this._stage) {
+    this._stage.destroy();
+    this._stage = null;
+  }
 };
 
 export default SpectrogramZoomView;

@@ -3,8 +3,8 @@
  */
 
 function SpectrogramDataChannel(spectrogramData, channelIndex, maxFreq) {
-    this._spectrogramData = spectrogramData;
-    this._channelIndex = channelIndex;
+  this._spectrogramData = spectrogramData;
+  this._channelIndex = channelIndex;
 }
 
 /**
@@ -12,9 +12,8 @@ function SpectrogramDataChannel(spectrogramData, channelIndex, maxFreq) {
  */
 
 SpectrogramDataChannel.prototype.frequency_array_at_index = function(index) {
-    return this._spectrogramData._at(index, this._channelIndex);
+  return this._spectrogramData._at(index, this._channelIndex);
 };
-
 
 /**
  * Sets the spectrogram data at index.
@@ -22,19 +21,19 @@ SpectrogramDataChannel.prototype.frequency_array_at_index = function(index) {
  */
 
 SpectrogramDataChannel.prototype.set_frequency_array_at_index = function(index, channel, sample) {
-    return this._spectrogramData._set_at(index, channel, sample);
+  return this._spectrogramData._set_at(index, channel, sample);
 };
 
 SpectrogramDataChannel.prototype.get_height = function(channel) {
-    return this._spectrogramData._data.channels[channel].length;
+  return this._spectrogramData._data.channels[channel].length;
 };
 
 SpectrogramDataChannel.prototype.get_length = function() {
-    return this.frequency_array_at_index(0).length;
+  return this.frequency_array_at_index(0).length;
 };
 
 SpectrogramDataChannel.prototype.existsIsSpectrogram = function() {
-    return true;
+  return true;
 };
 
 export default SpectrogramDataChannel;

@@ -363,8 +363,6 @@ Peaks.init = function(opts, callback) {
 
     callback(null, instance);
   });
-
-
 };
 
 Peaks.prototype._setOptions = function(opts) {

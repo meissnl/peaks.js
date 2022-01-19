@@ -13,16 +13,13 @@ import { processWaveForm } from './processAudioBuffer';
 // rewrite do support spectrogram
 function SpectrogramData(data) {
   if (isSpectrogramJSONFormat(data)) {
-
     this._data = data;
     this._length = data.channels[0][0].length;
-
 
     this._channels = [];
     for (var channel1 = 0; channel1 < this.channels; channel1++) {
       this._channels[channel1] = new SpectrogramDataChannel(this, channel1);
     }
-    console.log(this);
   }
   if (isJsonSpectrogramData(data)) {
     throw new TypeError(
@@ -79,8 +76,7 @@ function createFromAudioBuffer(audio_buffer, options, callback) {
 
     promise.then(function(result) {
       let buffer = result;
-
-      console.log(buffer);
+      
       callback(null, new SpectrogramData(buffer), audio_buffer);
     });
   }
@@ -118,7 +114,6 @@ function createFromArrayBuffer(audioContext, audioData, options, callback) {
   var promise = audioContext.decodeAudioData(
     audioData,
     function(audio_buffer) {
-      console.log('In createFromArrayBuffer data');
       // createFromAudioBuffer(audioContext, audio_buffer, options, callback);
       // var spectrogramData = processWaveForm(audio_buffer);
       // @todo Create SpectrogramData Object from buffer
@@ -134,10 +129,6 @@ function createFromArrayBuffer(audioContext, audioData, options, callback) {
 
 SpectrogramData.createFromAudio = function(options, callback) {
   var opts = getOptions(options);
-
-  console.log('In Spectrogram data');
-  console.log(options.audio_context);
-  console.log(options.array_buffer);
 
   if (options.audio_context && options.array_buffer) {
     return createFromArrayBuffer(options.audio_context, options.array_buffer, opts, callback);
@@ -195,7 +186,7 @@ function SpectrogramResampler(options) {
 
   var channels = this._inputData.channels;
 
-  //Not min max but samples
+  // Not min max but samples
   this._samples = new Array(channels);
 
   var channel;
@@ -266,7 +257,7 @@ SpectrogramResampler.prototype.next = function() {
       for (i = 0; i < channels; ++i) {
         channel = this._inputData.channel(i);
 
-        //instate of min or max sample in range, calculate average between all samples
+        // instate of min or max sample in range, calculate average between all samples
         value = channel.frequency_array_at_index(this._input_index);
 
         for (let i = 0;i < value.length; i++) {
@@ -276,7 +267,6 @@ SpectrogramResampler.prototype.next = function() {
         }
 
         this._samples[i] = value;
-
       }
 
       this._input_index++;

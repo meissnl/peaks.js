@@ -103,11 +103,6 @@ SpectrogramformBuilder.prototype.init = function(options, callback) {
     };
   }
 
-  console.log('In SpectrogramformBuilder');
-  console.log('Options:');
-
-  console.log(options);
-
   if (options.dataUri) {
     return this._getRemoteWaveformData(options, callback);
   }
@@ -196,8 +191,6 @@ SpectrogramformBuilder.prototype._getRemoteWaveformData = function(options, call
       return;
     }
 
-    console.log(options);
-
     var audioCtx = options.dataURI;
 
     var analyser = audioCtx.createAnalyser();
@@ -208,11 +201,7 @@ SpectrogramformBuilder.prototype._getRemoteWaveformData = function(options, call
 
     analyser.getByteFrequencyData(dataArray);
 
-    console.log(dataArray);
-
     var waveformData = WaveformData.create(event.target.response);
-
-    console.log(event.target.response);
 
     if (waveformData.channels !== 1 && waveformData.channels !== 2) {
       callback(new Error('Peaks.init(): Only mono or stereo waveforms are currently supported'));
@@ -307,8 +296,6 @@ SpectrogramformBuilder.prototype._buildWaveformFromLocalData = function(options,
 SpectrogramformBuilder.prototype._buildWaveformDataUsingWebAudio = function(options, callback) {
   var self = this;
 
-  console.log('Build waveform using webaudio');
-
   var audioContext = window.AudioContext || window.webkitAudioContext;
 
   if (!(options.webAudio.audioContext instanceof audioContext)) {
@@ -350,8 +337,6 @@ SpectrogramformBuilder.prototype._buildWaveformDataUsingWebAudio = function(opti
 };
 
 SpectrogramformBuilder.prototype._buildWaveformDataFromAudioBuffer = function(options, callback) {
-  console.log('Build waveform data from audio buffer');
-
   var webAudioOptions = options.webAudio;
 
   if (webAudioOptions.scale !== options.zoomLevels[0]) {

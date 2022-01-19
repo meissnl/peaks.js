@@ -164,8 +164,6 @@ WaveformShape.prototype._drawWaveform = function(context, waveformData,
       waveformHeight = height - (channels - 1) * waveformHeight;
     }
 
-    console.log(i);
-
     this._drawChannel(
       context,
       waveformData.channel(i),
@@ -180,7 +178,6 @@ WaveformShape.prototype._drawWaveform = function(context, waveformData,
   }
 };
 
-
 WaveformShape.prototype._convertHexToRGBArray = function(color) {
   let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
 
@@ -193,8 +190,8 @@ WaveformShape.prototype._convertHexToRGBArray = function(color) {
 
 WaveformShape.prototype._convertRGBAToRGBArray = function(color) {
   let colorArr = color.slice(
-      color.indexOf('(') + 1,
-      color.indexOf(')')
+    color.indexOf('(') + 1,
+    color.indexOf(')')
   ).split(', ');
 
   let color_rgb = colorArr ? {
@@ -234,7 +231,6 @@ WaveformShape.prototype._convertHex8ToRGBArray = function(color) {
 
 WaveformShape.prototype._drawChannel = function(context, channel,
     frameOffset, startPixels, endPixels, top, height) {
-
   if (typeof channel.existsIsSpectrogram === 'function') {
     var x;
     let data_height = channel.get_height(0);
@@ -261,7 +257,6 @@ WaveformShape.prototype._drawChannel = function(context, channel,
       color_rgb = this._convertRGBAToRGBArray(color_rgb);
     }
 
-
     for (let i = 0; i < data_height; i++) {
       let data_at_pixel = channel.frequency_array_at_index(i);
       let h = height / data_height;
@@ -282,7 +277,6 @@ WaveformShape.prototype._drawChannel = function(context, channel,
         }
 
         start += fft_width;
-
       }
       context.closePath();
     }

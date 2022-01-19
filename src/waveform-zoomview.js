@@ -472,7 +472,7 @@ WaveformZoomView.prototype.setZoom = function(options) {
   return true;
 };
 
-  WaveformZoomView.prototype._resampleData = function(options) {
+WaveformZoomView.prototype._resampleData = function(options) {
   var scale = options.scale;
 
   if (this._enableWaveformCache) {
